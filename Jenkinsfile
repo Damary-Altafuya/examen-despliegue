@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'jenkins/jenkins'          // Nombre de la imagen Docker
-        CONTAINER_NAME = 'examen-isp'     // Nombre del contenedor
-        CONTEXT_DIR = 'Examen-ISP'        // Carpeta donde están el Dockerfile y demás archivos
+        IMAGE_NAME = 'jenkins'          // Nombre de la imagen Docker
+        CONTAINER_NAME = 'examen-despliegue'     // Nombre del contenedor
+        CONTEXT_DIR = 'examen-despliegue'        // Carpeta donde están el Dockerfile y demás archivos
     }
 
     triggers {
         // Activar el pipeline automáticamente cuando se detecten cambios
-        pollSCM('H/1 * * * *') // Verifica cambios cada 1 minutos
+        pollSCM('H/3 * * * *') // Verifica cambios cada 3 minutos
     }
 
     stages {
