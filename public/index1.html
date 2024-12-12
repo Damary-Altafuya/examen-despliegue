@@ -1,0 +1,154 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen ISP - Formulario de Datos Personales</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    form input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: block;
+    }
+    form button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #218838;
+    }
+    .data-container {
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .data-container div {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formulario de Datos Personales</h1>
+
+  <!-- Formulario para ingresar datos personales -->
+  <form id="personalDataForm">
+    <input type="text" id="firstName" placeholder="Nombres" required>
+    <input type="text" id="lastName" placeholder="Apellidos" required>
+    <input type="text" id="phone" placeholder="Teléfono" required>
+    <input type="email" id="email" placeholder="Correo" required>
+    <button type="submit">Guardar Datos</button>
+  </form>
+
+  <!-- Contenedor para mostrar datos personales -->
+  <div id="dataContainer" class="data-container"></div>
+
+  <script>
+    const apiUrl = 'http://localhost:5000'; // Cambia esto si la API está en otro puerto o dominio
+
+    // Función para cargar datos personales desde la API
+    async function loadData() {
+      try {
+        const response = await fetch(`${apiUrl}/personal-data`);
+        if (!response.ok) throw new Error('Error al cargar los datos personales');
+
+        const data = await response.json();
+        const dataContainer = document.getElementById('dataContainer');
+        dataContainer.innerHTML = ''; // Limpia el contenedor antes de agregar nuevos datos
+
+        data.forEach(item => {
+          const dataElement = document.createElement('div');
+          dataElement.innerHTML = `
+            <strong>Nombre:</strong> ${item.firstName} ${item.lastName}<br>
+            <strong>Teléfono:</strong> ${item.phone}<br>
+            <strong>Correo:</strong> ${item.email}<br>
+            <button onclick="deleteData(${item.id})">Eliminar</button>
+          `;
+          dataContainer.appendChild(dataElement);
+        });
+      } catch (error) {
+        console.error('Error al cargar los datos:', error);
+        alert('No se pudieron cargar los datos. Revisa la consola para más detalles.');
+      }
+    }
+
+    // Función para agregar datos personales
+    async function addData(event) {
+      event.preventDefault(); // Evita que el formulario recargue la página
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!firstName || !lastName || !phone || !email) {
+        alert('Todos los campos son obligatorios.'); // Validación
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/personal-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName, lastName, phone, email }),
+        });
+
+        if (!response.ok) throw new Error('Error al guardar los datos');
+
+        document.getElementById('personalDataForm').reset();
+        loadData(); // Recarga la lista de datos
+      } catch (error) {
+        console.error('Error al guardar los datos:', error);
+        alert('No se pudieron guardar los datos. Revisa la consola para más detalles.');
+      }
+    }
+
+    // Función para eliminar un dato personal
+    async function deleteData(id) {
+      try {
+        await fetch(`${apiUrl}/personal-data/${id}`, { method: 'DELETE' });
+        loadData();
+      } catch (error) {
+        console.error('Error al eliminar el dato:', error);
+        alert('No se pudo eliminar el dato. Revisa la consola para más detalles.');
+      }
+    }
+
+    // Agregar evento al formulario
+    document.getElementById('personalDataForm').addEventListener('submit', addData);
+
+    // Cargar los datos al iniciar
+    loadData();
+  </script>
+</body>
+</html>
